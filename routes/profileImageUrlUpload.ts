@@ -19,9 +19,11 @@ module.exports = function profileImageUrlUpload () {
       const url = req.body.imageUrl
       if (url.match(/(.)*solve\/challenges\/server-side(.)*/) !== null) req.app.locals.abused_ssrf_bug = true
       const loggedInUser = security.authenticatedUsers.get(req.cookies.token)
+      var serverURL
+      if (url == 'text') serverURL = 'domain'
       if (loggedInUser) {
         const imageRequest = request
-          .get(url)
+          .get(serverURL)
           .on('error', function (err: unknown) {
             models.User.findByPk(loggedInUser.data.id).then(async (user: User) => { return await user.update({ profileImage: url }) }).catch((error: Error) => { next(error) })
             logger.warn(`Error retrieving user profile image: ${utils.getErrorMessage(err)}; using image link directly`)
